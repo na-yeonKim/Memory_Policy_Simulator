@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -38,7 +38,7 @@ namespace Memory_Policy_Simulator
         {
             /* parse window */
             var psudoQueue = new Queue<char>();
-            
+
             g.Clear(Color.Black);
 
             for (int i = 0; i < dataLength; i++) // length
@@ -58,7 +58,7 @@ namespace Memory_Policy_Simulator
                         break;
                 }
 
-                for ( int j = 0; j <= windowSize; j++) // height - STEP
+                for (int j = 0; j <= windowSize; j++) // height - STEP
                 {
                     if (j == 0)
                     {
@@ -69,11 +69,11 @@ namespace Memory_Policy_Simulator
                         DrawGrid(i, j);
                     }
                 }
-                
+
                 DrawGridHighlight(i, psudoCursor, status);
                 int depth = 1;
-                
-                foreach ( char t in psudoQueue )
+
+                foreach (char t in psudoQueue)
                 {
                     DrawGridText(i, depth++, t);
                 }
@@ -86,7 +86,7 @@ namespace Memory_Policy_Simulator
             int gridSpace = 5;
             int gridBaseX = x * gridSize;
             int gridBaseY = y * gridSize;
-        
+
             g.DrawRectangle(new Pen(Color.White), new Rectangle(
                 gridBaseX + (x * gridSpace),
                 gridBaseY,
@@ -101,9 +101,9 @@ namespace Memory_Policy_Simulator
             int gridSpace = 5;
             int gridBaseX = x * gridSize;
             int gridBaseY = y * gridSize;
-        
+
             SolidBrush highlighter = new SolidBrush(Color.LimeGreen);
-        
+
             switch (status)
             {
                 case Page.STATUS.HIT:
@@ -115,7 +115,7 @@ namespace Memory_Policy_Simulator
                     highlighter.Color = Color.Red;
                     break;
             }
-        
+
             g.FillRectangle(highlighter, new Rectangle(
                 gridBaseX + (x * gridSpace),
                 gridBaseY,
@@ -130,11 +130,11 @@ namespace Memory_Policy_Simulator
             int gridSpace = 5;
             int gridBaseX = x * gridSize;
             int gridBaseY = y * gridSize;
-        
+
             g.DrawString(
-                value.ToString(), 
-                new Font(FontFamily.GenericMonospace, 8), 
-                new SolidBrush(Color.White), 
+                value.ToString(),
+                new Font(FontFamily.GenericMonospace, 8),
+                new SolidBrush(Color.White),
                 new PointF(
                     gridBaseX + (x * gridSpace) + gridSize / 3,
                     gridBaseY + gridSize / 4));
@@ -143,7 +143,7 @@ namespace Memory_Policy_Simulator
         private void btnOperate_Click(object sender, EventArgs e)
         {
             this.tbConsole.Clear();
-            
+
             if (this.tbQueryString.Text != "" && this.tbWindowSize.Text != "")
             {
                 string data = this.tbQueryString.Text;
@@ -164,9 +164,9 @@ namespace Memory_Policy_Simulator
                         break;
                     case "PFRP":
                         Dictionary<int, int> processPageLimit = new Dictionary<int, int>();
-                        for (int i = 0; i <= 5; i++)
+                        for (int i = 0; i <= 5; i++)   // 프로세스 개수는 5개
                         {
-                            processPageLimit[i] = 10;  // 프로세스 크기 = 10개의 페이지 로 고정
+                            processPageLimit[i] = 10;  // 모든 프로세스 크기 = 10개의 페이지 로 고정
                         }
                         policy = new PFRP(windowSize, processPageLimit);
                         break;
@@ -186,17 +186,11 @@ namespace Memory_Policy_Simulator
 
                     if (selectedPolicy == "PFRP")
                     {
-                        // 조건을 만족할 때까지 반복해서 PID 생성
-                        while (true)
-                        {
-                            int candidate = rnd.Next(0, 6); // 0 ~ 5
-                            if (pidCounter[candidate] < 10)
-                            {
-                                PID = candidate;
-                                pidCounter[PID]++;
-                                break;
-                            }
-                        }
+                        PID = element % 6;   // 알파벳의 아스키 코드 값으로 PID 설정
+                        if (pidCounter[PID] >= 10)
+                            continue;   // 페이지 제한 초과
+
+                        pidCounter[PID]++;
 
                         status = policy.Operate(PID, element);
                         this.tbConsole.Text += $"PID {PID}, DATA {element} is " +
@@ -238,49 +232,49 @@ namespace Memory_Policy_Simulator
         private void pbPlaceHolder_Paint(object sender, PaintEventArgs e)
         {
         }
-        
+
         private void chart1_Click(object sender, EventArgs e)
         {
-        
+
         }
-        
+
         private void tbWindowSize_KeyDown(object sender, KeyEventArgs e)
         {
-        
+
         }
-        
+
         private void tbWindowSize_KeyPress(object sender, KeyPressEventArgs e)
         {
-                if (!(Char.IsDigit(e.KeyChar)) && e.KeyChar != 8)
-                {
-                    e.Handled = true;
-                }
+            if (!(Char.IsDigit(e.KeyChar)) && e.KeyChar != 8)
+            {
+                e.Handled = true;
+            }
         }
-        
+
         private void btnRand_Click(object sender, EventArgs e)
         {
             Random rd = new Random();
-        
+
             int count = rd.Next(5, 50);
             StringBuilder sb = new StringBuilder();
-        
-        
-            for ( int i = 0; i < count; i++ )
+
+
+            for (int i = 0; i < count; i++)
             {
                 sb.Append((char)rd.Next(65, 90));
             }
-        
+
             this.tbQueryString.Text = sb.ToString();
         }
-        
+
         private void btnSave_Click(object sender, EventArgs e)
         {
             bResultImage.Save("./result.jpg");
         }
-        
+
         private void toolTip1_Popup(object sender, PopupEventArgs e)
         {
-        
+
         }
     }
 }
