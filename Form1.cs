@@ -41,7 +41,7 @@ namespace Memory_Policy_Simulator
 
             g.Clear(Color.Black);
 
-            for (int i = 0; i < dataLength; i++) // length
+            for (int i = 0; i < core.pageHistory.Count; i++) // length
             {
                 int psudoCursor = core.pageHistory[i].loc;
                 char data = core.pageHistory[i].data;
