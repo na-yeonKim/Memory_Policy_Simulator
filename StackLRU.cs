@@ -31,24 +31,31 @@ namespace Memory_Policy_Simulator
 
             if (found) // HIT
             {
-                newPage.pid = Page.CREATE_ID++;
-                newPage.data = data;
-                newPage.status = Page.STATUS.HIT;
                 this.hit++;
 
-                int i = 0;
-                foreach (var x in frame_window)
+                var node = frame_window.First;
+                while (node != null)
                 {
-                    if (x.data == data)
+                    if (node.Value.data == data)
                     {
-                        frame_window.Remove(x);
-                        frame_window.AddLast(x);
-                        break;
-                    }
-                    i++;
-                }
+                        Page page = node.Value;
+                        frame_window.Remove(node);
+                        page.reference = true;
+                        frame_window.AddLast(page); // top으로 이동
 
-                newPage.loc = i + 1;
+                        Page hitPage = new Page
+                        {
+                            pid = Page.CREATE_ID++,
+                            data = data,
+                            status = Page.STATUS.HIT,
+                            reference = true,
+                            loc = frame_window.Count
+                        };
+                        pageHistory.Add(hitPage);
+                        return hitPage.status;
+                    }
+                    node = node.Next;
+                }
             }
             else // PAGE FAULT or MIGRATION
             {
@@ -63,7 +70,7 @@ namespace Memory_Policy_Simulator
                     this.migration++;
                     this.fault++;
                 }
-                else // PAGEFAULT
+                else // PAGE FAULT
                 {
                     newPage.status = Page.STATUS.PAGEFAULT;
                     cursor++;
@@ -72,9 +79,9 @@ namespace Memory_Policy_Simulator
 
                 newPage.loc = cursor;
                 frame_window.AddLast(newPage);
+                pageHistory.Add(newPage);
             }
 
-            pageHistory.Add(newPage);
             return newPage.status;
         }
 
