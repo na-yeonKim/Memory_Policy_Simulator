@@ -25,37 +25,49 @@ namespace Memory_Policy_Simulator
 
         public Page.STATUS Operate(char data)
         {
-            Page newPage = new Page();
+            Page newPage = new Page
+            {
+                pid = Page.CREATE_ID++,
+                data = data,
+                reference = false
+            };
 
             bool found = frame_window.Any(x => x.data == data);
 
             if (found) // HIT
             {
-                newPage.pid = Page.CREATE_ID++;
-                newPage.data = data;
-                newPage.status = Page.STATUS.HIT;
-                newPage.reference = true;
                 this.hit++;
 
-                int i = 0;
-                foreach (var x in frame_window)
+                int count = frame_window.Count;
+                for (int i = 0; i < count; i++)
                 {
-                    if (x.data == data) break;
-                    i++;
+                    Page page = frame_window.Dequeue();
+                    if (page.data == data)
+                    {
+                        page.reference = true;
+
+                        Page hitPage = new Page
+                        {
+                            pid = Page.CREATE_ID++,
+                            data = data,
+                            status = Page.STATUS.HIT,
+                            reference = true,
+                            loc = count
+                        };
+                        pageHistory.Add(hitPage);
+
+                        frame_window.Enqueue(page);
+                        return hitPage.status;
+                    }
+                    frame_window.Enqueue(page);
                 }
-                newPage.loc = i + 1;
             }
             else // PAGEFAULT or MIGRATION
             {
-                newPage.pid = Page.CREATE_ID++;
-                newPage.data = data;
-                newPage.reference = true;
-
                 if (frame_window.Count >= p_frame_size) // MIGRATION
                 {
                     newPage.status = Page.STATUS.MIGRATION;
 
-                    // 페이지 선택
                     while (true)
                     {
                         Page front = frame_window.Peek();
@@ -85,11 +97,13 @@ namespace Memory_Policy_Simulator
 
                 newPage.loc = cursor;
                 frame_window.Enqueue(newPage);
+                pageHistory.Add(newPage);
+                return newPage.status;
             }
 
-            pageHistory.Add(newPage);
-            return newPage.status;
+            return newPage.status; // fallback, 보통 실행되지 않음
         }
+
 
         public List<Page> GetPageInfo(Page.STATUS status)
         {

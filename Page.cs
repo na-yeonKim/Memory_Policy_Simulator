@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Memory_Policy_Simulator
 {
-    public struct Page
+    public class Page
     {
         public static int CREATE_ID = 0;
 
