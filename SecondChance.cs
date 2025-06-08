@@ -10,6 +10,7 @@ namespace Memory_Policy_Simulator
         public int p_frame_size;
         public Queue<Page> frame_window;
         public List<Page> pageHistory;
+        public List<List<Page>> frameSnapshots = new List<List<Page>>();
 
         public int hit;
         public int fault;
@@ -57,6 +58,7 @@ namespace Memory_Policy_Simulator
                         pageHistory.Add(hitPage);
 
                         frame_window.Enqueue(page);
+                        frameSnapshots.Add(frame_window.ToList());
                         return hitPage.status;
                     }
                     frame_window.Enqueue(page);
@@ -98,24 +100,11 @@ namespace Memory_Policy_Simulator
                 newPage.loc = cursor;
                 frame_window.Enqueue(newPage);
                 pageHistory.Add(newPage);
+                frameSnapshots.Add(frame_window.ToList());
                 return newPage.status;
             }
 
-            return newPage.status; // fallback, 보통 실행되지 않음
-        }
-
-
-        public List<Page> GetPageInfo(Page.STATUS status)
-        {
-            List<Page> pages = new List<Page>();
-            foreach (Page page in pageHistory)
-            {
-                if (page.status == status)
-                {
-                    pages.Add(page);
-                }
-            }
-            return pages;
+            return newPage.status;
         }
     }
 }

@@ -34,6 +34,7 @@ namespace Memory_Policy_Simulator
             comboBox1.SelectedIndex = 0;
         }
 
+        // FIFO, PFRP
         private void DrawBase(dynamic core, int windowSize, int dataLength)
         {
             /* parse window */
@@ -79,6 +80,38 @@ namespace Memory_Policy_Simulator
                 }
             }
         }
+
+        // StackLRU, SecondChance
+        private void DrawBase2(dynamic core, int windowSize, int dataLength)
+        {
+            g.Clear(Color.Black);
+
+            for (int time = 0; time < core.pageHistory.Count; time++)
+            {
+                Page historyPage = core.pageHistory[time];
+                char data = historyPage.data;
+                int psudoCursor = historyPage.loc;
+                Page.STATUS status = historyPage.status;
+
+                DrawGridText(time, 0, data);
+
+                // 기록된 시점의 프레임 상태 사용
+                List<Page> frameAtTime = core.frameSnapshots[time];
+
+                for (int depth = 1; depth <= windowSize; depth++)
+                {
+                    DrawGrid(time, depth);
+                }
+
+                DrawGridHighlight(time, psudoCursor, status);
+
+                for (int i = 0; i < frameAtTime.Count && i < windowSize; i++)
+                {
+                    DrawGridText(time, i + 1, frameAtTime[i].data);
+                }
+            }
+        }
+
 
         private void DrawGrid(int x, int y)
         {
@@ -206,7 +239,15 @@ namespace Memory_Policy_Simulator
                     }
                 }
 
-                DrawBase(policy, windowSize, data.Length);
+                if (selectedPolicy == "SecondChance" || selectedPolicy == "StackLRU")
+                {
+                    DrawBase2(policy, windowSize, data.Length);
+                }
+                else
+                {
+                    DrawBase(policy, windowSize, data.Length);
+                }
+
                 this.pbPlaceHolder.Refresh();
 
                 int total = policy.hit + policy.fault;

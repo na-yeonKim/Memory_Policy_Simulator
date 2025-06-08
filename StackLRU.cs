@@ -10,6 +10,7 @@ namespace Memory_Policy_Simulator
         public int p_frame_size;
         public LinkedList<Page> frame_window;
         public List<Page> pageHistory;
+        public List<List<Page>> frameSnapshots = new List<List<Page>>();
 
         public int hit;
         public int fault;
@@ -52,6 +53,7 @@ namespace Memory_Policy_Simulator
                             loc = frame_window.Count
                         };
                         pageHistory.Add(hitPage);
+                        frameSnapshots.Add(frame_window.ToList());
                         return hitPage.status;
                     }
                     node = node.Next;
@@ -81,21 +83,8 @@ namespace Memory_Policy_Simulator
                 frame_window.AddLast(newPage);
                 pageHistory.Add(newPage);
             }
-
+            frameSnapshots.Add(frame_window.ToList());
             return newPage.status;
-        }
-
-        public List<Page> GetPageInfo(Page.STATUS status)
-        {
-            List<Page> pages = new List<Page>();
-            foreach (Page page in pageHistory)
-            {
-                if (page.status == status)
-                {
-                    pages.Add(page);
-                }
-            }
-            return pages;
         }
     }
 }
